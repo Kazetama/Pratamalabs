@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Download,
-  Loader2,
   Lock,
   Search,
   Trash2,
@@ -23,12 +22,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { usePlugins } from "@/context/plugins-context";
 import { AVAILABLE_PLUGINS } from "@/config/plugins";
+import { PluginInstallModal } from "@/features/plugins";
+import type { PluginItem } from "@/types/plugin";
 
 export default function PluginsPage() {
-  const { installedPlugins, installPlugin, uninstallPlugin, isPluginInstalled, installingId } =
+  const { installedPlugins, installPlugin, uninstallPlugin, isPluginInstalled } =
     usePlugins();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<"all" | "installed" | "available">("all");
+  const [modalPlugin, setModalPlugin] = useState<PluginItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filteredPlugins = AVAILABLE_PLUGINS.filter((plugin) => {
     const matchesSearch =
@@ -42,6 +45,11 @@ export default function PluginsPage() {
     if (selectedFilter === "available") return matchesSearch && !isInstalled;
     return matchesSearch;
   });
+
+  const handleOpenInstall = (plugin: PluginItem) => {
+    setModalPlugin(plugin);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -113,7 +121,6 @@ export default function PluginsPage() {
         {filteredPlugins.map((plugin) => {
           const Icon = plugin.icon;
           const isInstalled = isPluginInstalled(plugin.id);
-          const isInstalling = installingId === plugin.id;
 
           return (
             <Card
@@ -182,21 +189,11 @@ export default function PluginsPage() {
                   ) : (
                     <Button
                       size="xs"
-                      onClick={() => installPlugin(plugin.id)}
-                      disabled={isInstalling}
+                      onClick={() => handleOpenInstall(plugin)}
                       className="text-xs h-7 gap-1.5 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90"
                     >
-                      {isInstalling ? (
-                        <>
-                          <Loader2 className="size-3.5 animate-spin" />
-                          <span>Installing...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Download className="size-3.5" />
-                          <span>Install Plugin</span>
-                        </>
-                      )}
+                      <Download className="size-3.5" />
+                      <span>Install Plugin</span>
                     </Button>
                   )}
                 </div>
@@ -205,6 +202,16 @@ export default function PluginsPage() {
           );
         })}
       </div>
+
+      {/* Auto-Install & VPS Manual Guide Modal */}
+      <PluginInstallModal
+        plugin={modalPlugin}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onInstallComplete={(pluginId) => {
+          installPlugin(pluginId);
+        }}
+      />
     </div>
   );
 }

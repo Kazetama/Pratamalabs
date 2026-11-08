@@ -41,60 +41,86 @@ export default function WebTerminalPage() {
       { id: Date.now().toString(), type: "command", text: `root@${SITE_CONFIG.defaultNode.id}:~# ${cmd}` },
     ];
 
-    switch (cmd.toLowerCase()) {
-      case "clear":
-        setLogs([]);
-        setInputVal("");
-        return;
-      case "help":
-        newLogs.push({
-          id: (Date.now() + 1).toString(),
-          type: "output",
-          text: "Supported commands: help, uptime, uname -a, df -h, free -m, docker ps, clear",
-        });
-        break;
-      case "uptime":
-        newLogs.push({
-          id: (Date.now() + 1).toString(),
-          type: "output",
-          text: " 17:48:00 up 14 days,  6:12,  1 user,  load average: 0.18, 0.22, 0.19",
-        });
-        break;
-      case "uname -a":
-        newLogs.push({
-          id: (Date.now() + 1).toString(),
-          type: "output",
-          text: `Linux ${SITE_CONFIG.defaultNode.id} 6.8.0-45-generic #45-Ubuntu SMP PREEMPT_DYNAMIC x86_64 GNU/Linux`,
-        });
-        break;
-      case "df -h":
-        newLogs.push({
-          id: (Date.now() + 1).toString(),
-          type: "output",
-          text: "Filesystem      Size  Used Avail Use% Mounted on\n/dev/nvme0n1p2  120G   42G   73G  37% /\n/dev/nvme0n1p1  512M  6.1M  506M   2% /boot/efi",
-        });
-        break;
-      case "free -m":
-        newLogs.push({
-          id: (Date.now() + 1).toString(),
-          type: "output",
-          text: "               total        used        free      shared  buff/cache   available\nMem:            7912        3420        2140         128        2352        4210\nSwap:           2048          12        2036",
-        });
-        break;
-      case "docker ps":
-        newLogs.push({
-          id: (Date.now() + 1).toString(),
-          type: "output",
-          text: "CONTAINER ID   IMAGE                 STATUS         PORTS                     NAMES\nc89f1a23       caddy:2.8.4-alpine    Up 3 days      0.0.0.0:80->80/tcp        caddy-reverse-proxy\nb41e8c71       postgres:16.3-alpine  Up 14 days     127.0.0.1:5432->5432/tcp  postgres-primary\nf9024a18       redis:7.2.5-alpine    Up 14 days     127.0.0.1:6379->6379/tcp  redis-session-cache",
-        });
-        break;
-      default:
-        newLogs.push({
-          id: (Date.now() + 1).toString(),
-          type: "error",
-          text: `bash: ${cmd}: command not found. Type 'help' for available host commands.`,
-        });
-        break;
+    const lower = cmd.toLowerCase();
+
+    if (lower === "clear") {
+      setLogs([]);
+      setInputVal("");
+      return;
+    }
+
+    if (lower === "help") {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: "Supported commands: help, uptime, uname -a, df -h, free -m, docker ps, ollama list, ollama ps, ollama run qwen2.5-coder:1.5b, clear",
+      });
+    } else if (lower === "uptime") {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: " 20:35:00 up 14 days,  6:20,  1 user,  load average: 0.14, 0.18, 0.15",
+      });
+    } else if (lower === "uname -a") {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: `Linux ${SITE_CONFIG.defaultNode.id} 6.8.0-45-generic #45-Ubuntu SMP PREEMPT_DYNAMIC x86_64 GNU/Linux`,
+      });
+    } else if (lower === "df -h") {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: "Filesystem      Size  Used Avail Use% Mounted on\n/dev/nvme0n1p2  120G   42G   73G  37% /\n/dev/nvme0n1p1  512M  6.1M  506M   2% /boot/efi",
+      });
+    } else if (lower === "free -m") {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: "               total        used        free      shared  buff/cache   available\nMem:            7912        3420        2140         128        2352        4210\nSwap:           2048          12        2036",
+      });
+    } else if (lower === "docker ps") {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: "CONTAINER ID   IMAGE                 STATUS         PORTS                     NAMES\nc89f1a23       caddy:2.8.4-alpine    Up 3 days      0.0.0.0:80->80/tcp        caddy-reverse-proxy\nb41e8c71       postgres:16.3-alpine  Up 14 days     127.0.0.1:5432->5432/tcp  postgres-primary\nf9024a18       redis:7.2.5-alpine    Up 14 days     127.0.0.1:6379->6379/tcp  redis-session-cache",
+      });
+    } else if (lower === "ollama" || lower === "ollama --help") {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: "Usage:\n  ollama [flags]\n  ollama [command]\n\nAvailable Commands:\n  serve       Start ollama\n  create      Create a model from a Modelfile\n  show        Show information for a model\n  run         Run a model (e.g. ollama run qwen2.5-coder:1.5b)\n  stop        Stop a running model\n  pull        Pull a model from a registry\n  push        Push a model to a registry\n  list        List models\n  ps          List running models\n  rm          Remove a model",
+      });
+    } else if (lower === "ollama list") {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: "NAME                    ID              SIZE      MODIFIED\nqwen2.5-coder:1.5b      b3c3e76a6b5e    986 MB    2 hours ago",
+      });
+    } else if (lower === "ollama ps") {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: "NAME                    ID              SIZE      PROCESSOR    UNTIL\nqwen2.5-coder:1.5b      b3c3e76a6b5e    1.4 GB    100% CPU     4 minutes from now",
+      });
+    } else if (lower.startsWith("ollama run qwen2.5-coder:1.5b")) {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: ">>> Loading model 'qwen2.5-coder:1.5b' into memory (986 MB allocated)...\n>>> [Qwen 2.5 Coder] Model active! Context window: 32k. Ready to assist with VPS scripts, Next.js, and server orchestration.\n>>> Try asking: 'bagaimana cara restart nginx?' or 'generate docker-compose'",
+      });
+    } else if (lower.startsWith("ollama pull")) {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "output",
+        text: `pulling manifest\npulling 548a7b9e38... 100% ▕████████████████▏ 986 MB/986 MB\nverifying sha256 digest\nwriting manifest\nsuccess`,
+      });
+    } else {
+      newLogs.push({
+        id: (Date.now() + 1).toString(),
+        type: "error",
+        text: `bash: ${cmd}: command not found. Type 'help' for available host commands.`,
+      });
     }
 
     setLogs(newLogs);

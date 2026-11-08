@@ -12,5 +12,6 @@ export interface PluginItem {
   size: string;
   unlocksRoute?: string;
   status?: "available" | "installing" | "installed";
+  installCommands?: string[];
+  serviceName?: string;
 }
-
